@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demlee - QR Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Animated background orbs */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        body::before {
+            width: 600px;
+            height: 600px;
+            background: #60a5fa;
+            top: -200px;
+            left: -200px;
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: #a78bfa;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-50px, 50px) scale(0.9); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            z-index: 1;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.5),
+                0 0 60px rgba(96, 165, 250, 0.3),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Glowing border effect */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 30px;
+            padding: 2px;
+            background: linear-gradient(135deg, 
+                rgba(96, 165, 250, 0.6) 0%,
+                rgba(167, 139, 250, 0.6) 50%,
+                rgba(96, 165, 250, 0.6) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0.5;
+            animation: borderGlow 3s infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+
+        /* Input Group */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(96, 165, 250, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1.5px solid rgba(167, 139, 250, 0.3);
+            padding: 20px 25px;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 4px 20px rgba(96, 165, 250, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .input-wrapper:hover {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 
+                0 6px 30px rgba(96, 165, 250, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .input-wrapper:focus-within {
+            background: rgba(96, 165, 250, 0.25);
+            border-color: rgba(167, 139, 250, 0.7);
+            box-shadow: 
+                0 8px 40px rgba(96, 165, 250, 0.35),
+                0 0 0 3px rgba(96, 165, 250, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .input-field {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 300;
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: rgba(96, 165, 250, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            border-radius: 15px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 30px 0;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            background: rgba(96, 165, 250, 0.3);
+            border-color: rgba(96, 165, 250, 0.6);
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+            position: relative;
+            display: inline-block;
+        }
+
+        .result-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 12px 40px rgba(30, 60, 114, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            margin: 25px 0;
+            animation: qrAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.3s ease;
+        }
+
+        #qrcode:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 16px 50px rgba(30, 60, 114, 0.2),
+                0 6px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        #qrcode canvas {
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        #qrcode:hover canvas {
+            transform: scale(1.02);
+        }
+
+        @keyframes qrAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .qr-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 20px;
+            box-shadow: 0 4px 16px rgba(96, 165, 250, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .qr-info:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(96, 165, 250, 0.2);
+        }
+
+        .qr-info-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+
+        /* Name Input Section */
+        .name-input-section {
+            margin: 25px 0;
+            width: 100%;
+        }
+
+        .name-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .name-label svg {
+            opacity: 0.8;
+        }
+
+        .name-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(96, 165, 250, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1.5px solid rgba(167, 139, 250, 0.3);
+            padding: 16px 20px;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 4px 20px rgba(96, 165, 250, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .name-input-wrapper:hover {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 
+                0 6px 30px rgba(96, 165, 250, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .name-input-wrapper:focus-within {
+            background: rgba(96, 165, 250, 0.25);
+            border-color: rgba(167, 139, 250, 0.7);
+            box-shadow: 
+                0 8px 40px rgba(96, 165, 250, 0.35),
+                0 0 0 3px rgba(96, 165, 250, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .name-input-field {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-align: center;
+        }
+
+        .name-input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 300;
+        }
+
+        /* Download Buttons */
+        .download-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .download-btn {
+            flex: 1;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Loading */
+        .loading {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: rgba(96, 165, 250, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Progress Bar (Optional Enhancement) */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .container {
+                margin: 0 auto;
+                padding: 0 5px;
+                max-width: 100%;
+            }
+
+            .glass-card {
+                padding: 30px 20px;
+                margin: 0;
+                border-radius: 25px;
+            }
+
+            .title {
+                font-size: 1.6rem;
+            }
+
+            .generate-btn {
+                padding: 16px;
+                font-size: 1rem;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .download-btn {
+                width: 100%;
+                padding: 16px;
+            }
+
+            .name-input-wrapper {
+                padding: 14px 18px;
+            }
+
+            .name-input-field {
+                font-size: 0.95rem;
+            }
+
+            #qrcode {
+                padding: 20px;
+                margin: 20px 0;
+            }
+
+            .credit-footer {
+                margin-top: 20px;
+                padding: 20px 15px;
+            }
+
+            .social-buttons {
+                gap: 8px;
+            }
+            
+            .social-btn {
+                min-width: 90px;
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+                padding-top: 15px;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .glass-card {
+                padding: 25px 15px;
+                border-radius: 20px;
+            }
+
+            .title {
+                font-size: 1.4rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .input-wrapper, .name-input-wrapper {
+                padding: 12px 16px;
+            }
+
+            .generate-btn {
+                padding: 14px;
+                font-size: 0.95rem;
+            }
+
+            #qrcode {
+                padding: 15px;
+                margin: 15px 0;
+            }
+
+            .qr-info {
+                padding: 10px 18px;
+                font-size: 0.85rem;
+            }
+
+            .download-btn {
+                padding: 14px;
+                font-size: 0.9rem;
+            }
+
+            .credit-footer {
+                padding: 15px 10px;
+            }
+
+            .social-btn {
+                min-width: 80px;
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .container {
+                max-width: 600px;
+                margin: 30px auto;
+            }
+
+            .glass-card {
+                padding: 45px 35px;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            body {
+                align-items: center;
+                padding: 40px;
+            }
+
+            .container {
+                margin: 0 auto;
+            }
+
+            .glass-card {
+                padding: 50px 40px;
+            }
+        }
+
+        /* Fix for very small screens */
+        @media (max-height: 600px) {
+            body {
+                align-items: flex-start;
+                padding-top: 10px;
+            }
+
+            .container {
+                margin-top: 0;
+            }
+
+            .glass-card {
+                padding: 20px 15px;
+            }
+
+            .title {
+                font-size: 1.3rem;
+                margin-bottom: 5px;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .header {
+                margin-bottom: 25px;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            .generate-btn {
+                margin: 20px 0;
+                padding: 12px;
+            }
+
+            #qrcode {
+                padding: 12px;
+                margin: 12px 0;
+            }
+
+            .name-input-section {
+                margin: 15px 0;
+            }
+
+            .download-buttons {
+                gap: 8px;
+            }
+
+            .download-btn {
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+
+            .credit-footer {
+                margin-top: 15px;
+                padding: 12px;
+            }
+        }
+
+        /* Credit Footer */
+        .credit-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .credit-footer p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin: 0 0 20px 0;
+        }
+
+        .credit-name {
+            color: #60a5fa;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .credit-footer:hover .credit-name {
+            color: #a78bfa;
+            text-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+        }
+
+        /* Social Media Buttons */
+        .social-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            min-width: 110px;
+            justify-content: center;
+        }
+
+        .social-btn svg {
+            transition: transform 0.3s ease;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-btn:hover svg {
+            transform: scale(1.1);
+        }
+
+        .social-btn.telegram:hover {
+            background: rgba(0, 136, 204, 0.2);
+            border-color: rgba(0, 136, 204, 0.4);
+            color: #0088cc;
+            box-shadow: 0 8px 25px rgba(0, 136, 204, 0.25);
+        }
+
+        .social-btn.tiktok:hover {
+            background: rgba(255, 0, 80, 0.2);
+            border-color: rgba(255, 0, 80, 0.4);
+            color: #ff0050;
+            box-shadow: 0 8px 25px rgba(255, 0, 80, 0.25);
+        }
+
+        .social-btn.gmail:hover {
+            background: rgba(234, 67, 53, 0.2);
+            border-color: rgba(234, 67, 53, 0.4);
+            color: #ea4335;
+            box-shadow: 0 8px 25px rgba(234, 67, 53, 0.25);
+        }
+
+        .social-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Social Buttons */
+        @media (max-width: 600px) {
+            .social-buttons {
+                gap: 10px;
+            }
+            
+            .social-btn {
+                min-width: 100px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            color: #1e3c72;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+        }
+
+        .notification.info {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+        }
+
+        @media (max-width: 600px) {
+            .notification {
+                right: 10px;
+                left: 10px;
+                top: 10px;
+                position: fixed;
+                z-index: 10000;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .notification {
+                top: 5px;
+                right: 5px;
+                left: 5px;
+                font-size: 0.85rem;
+                padding: 12px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <div class="header">
+                <h1 class="title">QR Generator</h1>
+                <p class="subtitle">Create beautiful QR codes instantly</p>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">
+                    Enter Your URL
+                </label>
+                <div class="input-wrapper">
+                    <input 
+                        type="url" 
+                        class="input-field" 
+                        id="url-input" 
+                        placeholder="Enter your URL here..."
+                    >
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generateQR()">
+                <span>Generate QR Code</span>
+            </button>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div id="result" class="result-section">
+                <h3 class="result-title">Your QR Code</h3>
+                <div id="qrcode"></div>
+                <div class="qr-info">
+                    <svg class="qr-info-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span>High Quality: </span>
+                    <span id="qr-size-display">256 × 280</span>
+                </div>
+                
+                <!-- Name Input Section -->
+                <div class="name-input-section">
+                    <label class="name-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Add Your Name (If You Want)
+                    </label>
+                    <div class="name-input-wrapper">
+                        <input 
+                            type="text" 
+                            class="name-input-field" 
+                            id="name-input" 
+                            placeholder="Enter your name..."
+                            maxlength="30"
+                        >
+                    </div>
+                </div>
+                <div class="download-buttons">
+                    <button class="download-btn" onclick="downloadQR()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Download
+                    </button>
+                    <button class="download-btn" onclick="copyQR()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Credit Footer -->
+        <div class="credit-footer">
+            <p>Created by <span class="credit-name">@Demiee_01</span></p>
+            <div class="social-buttons">
+                <a href="https://t.me/demiee_01" target="_blank" class="social-btn telegram">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-.38.24-1.07.72-.96.66-1.97 1.35-1.97 1.35s-.22.14-.63.02c-.37-.11-.85-.26-1.28-.48-.53-.27-.95-.41-.91-.87.02-.24.15-.49.91-.85 2.16-.94 3.64-1.57 4.45-1.89 1.94-.77 2.34-.91 2.61-.91.06 0 .19.01.28.09.07.06.09.14.1.19-.01.05-.01.24-.05.38z"/>
+                    </svg>
+                    Telegram
+                </a>
+                <a href="https://www.tiktok.com/@demiee_01?_r=1&_t=ZS-92bBLmua7eSG" target="_blank" class="social-btn tiktok">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                    </svg>
+                    TikTok
+                </a>
+                <a href="mailto:demiee34@gmail.com" class="social-btn gmail">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    Gmail
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let qrCodeInstance = null;
+
+        function generateQR() {
+            const url = document.getElementById('url-input').value.trim();
+            
+            if (!url) {
+                showNotification('Please enter a URL', 'error');
+                return;
+            }
+
+            // Validate URL
+            try {
+                new URL(url);
+            } catch (e) {
+                showNotification('Please enter a valid URL (e.g., https://example.com)', 'error');
+                return;
+            }
+
+            const resultSection = document.getElementById('result');
+            const qrContainer = document.getElementById('qrcode');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+
+            // Show progress
+            progressContainer.classList.add('show');
+            progressBar.style.width = '0%';
+
+            // Animate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        progressContainer.classList.remove('show');
+                    }, 300);
+                }
+            }, 80);
+
+            // Show loading
+            qrContainer.innerHTML = '<div class="loading"></div>';
+            resultSection.classList.add('show');
+
+            setTimeout(() => {
+                qrContainer.innerHTML = '';
+                
+                // Generate QR code with clean, professional styling
+                try {
+                    qrCodeInstance = new QRCode(qrContainer, {
+                        text: url,
+                        width: 256,
+                        height: 256,
+                        colorDark: '#1e3c72',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    document.getElementById('qr-size-display').textContent = '256 × 256';
+                    
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    showNotification('Professional QR code generated successfully!', 'success');
+                } catch (error) {
+                    showNotification('Failed to generate QR code', 'error');
+                    console.error(error);
+                }
+            }, 800);
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                showNotification('Please generate a QR code first', 'error');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const downloadBtn = event.target;
+                const originalText = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<span>Downloading...</span>';
+                downloadBtn.disabled = true;
+
+                // Get user's name
+                const userName = document.getElementById('name-input').value.trim();
+
+                // Create enhanced QR code with professional styling
+                const enhancedCanvas = document.createElement('canvas');
+                const size = 400; // Larger size for better quality
+                const padding = 40; // Extra padding around QR code
+                const borderRadius = 60; // Rounded corners
+                const nameHeight = userName ? 50 : 0; // Extra space for name
+                
+                enhancedCanvas.width = size;
+                enhancedCanvas.height = size + nameHeight;
+                const ctx = enhancedCanvas.getContext('2d');
+
+                // Create rounded rectangle path
+                function roundRect(x, y, width, height, radius) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + radius, y);
+                    ctx.lineTo(x + width - radius, y);
+                    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                    ctx.lineTo(x + width, y + height - radius);
+                    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                    ctx.lineTo(x + radius, y + height);
+                    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                    ctx.lineTo(x, y + radius);
+                    ctx.quadraticCurveTo(x, y, x + radius, y);
+                    ctx.closePath();
+                }
+
+                // Fill background with rounded rectangle
+                roundRect(0, 0, size, size + nameHeight, borderRadius);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+
+                // Add subtle shadow/border effect
+                ctx.shadowColor = 'rgba(30, 60, 114, 0.1)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 10;
+                
+                roundRect(5, 5, size - 10, size + nameHeight - 10, borderRadius - 5);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fill();
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Draw the QR code centered with padding
+                const qrSize = size - (padding * 2);
+                ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
+                // Add user's name if provided
+                if (userName) {
+                    ctx.font = 'bold 24px Inter, Arial, sans-serif';
+                    ctx.fillStyle = '#1e3c72';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Add text shadow for better readability
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 2;
+                    
+                    ctx.fillText(userName, size / 2, size + (nameHeight / 2));
+                    
+                    // Reset shadow
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                }
+
+                // Convert to blob and download
+                enhancedCanvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                        const namePrefix = userName ? `${userName.replace(/[^a-zA-Z0-9]/g, '_')}-` : '';
+                        a.download = `${namePrefix}qr-code-${timestamp}.png`;
+                        a.href = url;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        showNotification(`QR code${userName ? ` for ${userName}` : ''} downloaded successfully!`, 'success');
+                    } else {
+                        fallbackDownload();
+                    }
+                }, 'image/png', 1.0);
+
+            } catch (error) {
+                console.error('Download error:', error);
+                showNotification('Download failed. Please try again.', 'error');
+                
+                // Reset button state
+                const downloadBtn = event.target;
+                downloadBtn.innerHTML = 'Download';
+                downloadBtn.disabled = false;
+            }
+        }
+
+        function copyQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                showNotification('Please generate a QR code first', 'error');
+                return;
+            }
+
+            // Show loading state
+            const copyBtn = event.target;
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span>Copying...</span>';
+            copyBtn.disabled = true;
+
+            const resetButton = () => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.disabled = false;
+            };
+
+            try {
+                // Get user's name
+                const userName = document.getElementById('name-input').value.trim();
+
+                // Create enhanced QR code with professional styling (same as download)
+                const enhancedCanvas = document.createElement('canvas');
+                const size = 400;
+                const padding = 40;
+                const borderRadius = 60;
+                const nameHeight = userName ? 50 : 0;
+                
+                enhancedCanvas.width = size;
+                enhancedCanvas.height = size + nameHeight;
+                const ctx = enhancedCanvas.getContext('2d');
+
+                // Create rounded rectangle path
+                function roundRect(x, y, width, height, radius) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + radius, y);
+                    ctx.lineTo(x + width - radius, y);
+                    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                    ctx.lineTo(x + width, y + height - radius);
+                    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                    ctx.lineTo(x + radius, y + height);
+                    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                    ctx.lineTo(x, y + radius);
+                    ctx.quadraticCurveTo(x, y, x + radius, y);
+                    ctx.closePath();
+                }
+
+                // Fill background with rounded rectangle
+                roundRect(0, 0, size, size + nameHeight, borderRadius);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+
+                // Add subtle shadow/border effect
+                ctx.shadowColor = 'rgba(30, 60, 114, 0.1)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 10;
+                
+                roundRect(5, 5, size - 10, size + nameHeight - 10, borderRadius - 5);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fill();
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Draw the QR code centered with padding
+                const qrSize = size - (padding * 2);
+                ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
+                // Add user's name if provided
+                if (userName) {
+                    ctx.font = 'bold 24px Inter, Arial, sans-serif';
+                    ctx.fillStyle = '#1e3c72';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Add text shadow for better readability
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 2;
+                    
+                    ctx.fillText(userName, size / 2, size + (nameHeight / 2));
+                    
+                    // Reset shadow
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                }
+
+                // Try to copy the enhanced version
+                if (navigator.clipboard && window.ClipboardItem) {
+                    enhancedCanvas.toBlob(async (blob) => {
+                        if (!blob) {
+                            fallbackCopy();
+                            return;
+                        }
+
+                        try {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+                            resetButton();
+                            showNotification(`QR code${userName ? ` for ${userName}` : ''} copied to clipboard!`, 'success');
+                        } catch (clipboardError) {
+                            console.log('Clipboard API failed, trying fallback:', clipboardError);
+                            fallbackCopy();
+                        }
+                    }, 'image/png', 1.0);
+                } else {
+                    fallbackCopy();
+                }
+
+            } catch (error) {
+                console.error('Copy error:', error);
+                fallbackCopy();
+            }
+
+            // Fallback methods for older browsers or HTTP sites
+            function fallbackCopy() {
+                try {
+                    // Method 2: Copy data URL to clipboard (text-based)
+                    const dataUrl = canvas.toDataURL('image/png', 1.0);
+                    
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(dataUrl).then(() => {
+                            resetButton();
+                            showNotification('QR code data copied to clipboard!', 'success');
+                        }).catch(() => {
+                            textAreaFallback(dataUrl);
+                        });
+                    } else {
+                        textAreaFallback(dataUrl);
+                    }
+                } catch (error) {
+                    console.error('Fallback copy failed:', error);
+                    manualCopyInstructions();
+                }
+            }
+
+            // Method 3: Textarea fallback for very old browsers
+            function textAreaFallback(dataUrl) {
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = dataUrl;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    resetButton();
+                    if (successful) {
+                        showNotification('QR code data copied to clipboard!', 'success');
+                    } else {
+                        manualCopyInstructions();
+                    }
+                } catch (error) {
+                    console.error('Textarea fallback failed:', error);
+                    manualCopyInstructions();
+                }
+            }
+
+            // Method 4: Manual instructions for unsupported browsers
+            function manualCopyInstructions() {
+                resetButton();
+                
+                // Create a modal with instructions
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 20px;
+                    box-sizing: border-box;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="
+                        background: white;
+                        padding: 30px;
+                        border-radius: 15px;
+                        text-align: center;
+                        max-width: 400px;
+                        width: 100%;
+                        font-family: Arial, sans-serif;
+                    ">
+                        <h3 style="margin-top: 0; color: #333;">Manual Copy Instructions</h3>
+                        <p style="color: #666; line-height: 1.5;">
+                            To copy the QR code:<br>
+                            <strong>Desktop:</strong> Right-click the QR code → "Copy image"<br>
+                            <strong>Mobile:</strong> Long-press the QR code → "Copy image"
+                        </p>
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: #007bff;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-size: 16px;
+                        ">Got it!</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Remove modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+                
+                showNotification('Please follow the manual copy instructions', 'info');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Remove existing notification
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            // Hide and remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Enter key support
+        document.getElementById('url-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQR();
+            }
+        });
+
+        // Enter key support for name input
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('name-input');
+            if (nameInput) {
+                nameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        generateQR();
+                    }
+                });
+            }
+        });
+
+        // Clear QR code when input changes
+        document.getElementById('url-input').addEventListener('input', function() {
+            const resultSection = document.getElementById('result');
+            if (resultSection.classList.contains('show')) {
+                resultSection.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
