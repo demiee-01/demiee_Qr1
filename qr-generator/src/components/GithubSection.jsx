@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
-const REPO_URL   = 'https://github.com/demiee-01/demiee_Qr1'
-const CLONE_SSH  = 'git@github.com:demiee-01/demiee_Qr1.git'
-const CLONE_HTTPS = 'https://github.com/demiee-01/demiee_Qr1.git'
+const REPO_URL    = import.meta.env.VITE_GITHUB_REPO_URL
+const CLONE_SSH   = import.meta.env.VITE_CLONE_SSH
+const CLONE_HTTPS = import.meta.env.VITE_CLONE_HTTPS
 
 function CloneRow({ label, value, notify }) {
   const [copied, setCopied] = useState(false)
@@ -112,7 +112,7 @@ export default function GithubSection({ notify }) {
       </div>
 
       {/* CTA */}
-      <a href="https://github.com/demiee-01" target="_blank" rel="noreferrer"
+      <a href={import.meta.env.VITE_GITHUB_URL} target="_blank" rel="noreferrer"
          className="btn-shimmer flex items-center gap-2 px-7 py-3.5 md:px-8 md:py-4 rounded-xl text-white text-sm md:text-base font-semibold transition-all duration-300 hover:-translate-y-0.5 no-underline"
          style={{
            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)',
