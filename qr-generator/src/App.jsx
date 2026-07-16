@@ -102,7 +102,7 @@ export default function App() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: 'scroll',
       }}
     >
       <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px] pointer-events-none" />

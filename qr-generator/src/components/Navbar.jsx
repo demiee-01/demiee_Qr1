@@ -9,7 +9,7 @@ const links = [
 function scrollTo(id) {
   const el = document.querySelector(id)
   if (!el) return
-  const offset = 64 // navbar height
+  const offset = 64
   const top = el.getBoundingClientRect().top + window.scrollY - offset
   window.scrollTo({ top, behavior: 'smooth' })
 }

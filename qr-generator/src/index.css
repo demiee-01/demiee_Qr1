@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* ── Smooth scroll + mobile momentum ── */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33%       { transform: translate(80px, -80px) scale(1.1); }
@@ -29,6 +38,17 @@
   opacity: 0.25;
   pointer-events: none;
   animation: float 22s infinite ease-in-out;
+  /* prevent orbs from causing scroll jank */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* reduce orb blur on mobile for perf */
+@media (max-width: 768px) {
+  .orb {
+    filter: blur(60px);
+    opacity: 0.15;
+  }
 }
 
 .glass {

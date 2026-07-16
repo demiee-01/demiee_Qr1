@@ -86,7 +86,7 @@ export default function GithubSection({ notify }) {
               </svg>
             </div>
             <div>
-              <p className="text-white font-semibold text-sm md:text-base">demiee-01 / demiee_Qr1</p>
+              <p className="text-white font-semibold text-sm md:text-base">{import.meta.env.VITE_REPO_DISPLAY}</p>
               <p className="text-white/40 text-xs md:text-sm mt-0.5">QR Code Generator · v2.1</p>
             </div>
           </div>
