@@ -113,31 +113,31 @@ export default function App() {
 
       {/* ── HOME ── */}
       <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-24">
-        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl flex flex-col gap-4 md:gap-5 lg:gap-6">
+        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl flex flex-col gap-4 md:gap-5 lg:gap-7">
 
           {/* Header */}
-          <div className="text-center mb-2 md:mb-3 lg:mb-4">
-            <div className="inline-flex items-center gap-2 tag-badge mb-3 md:mb-4 md:text-sm md:px-4 md:py-1.5">
+          <div className="text-center mb-2 md:mb-3 lg:mb-5">
+            <div className="inline-flex items-center gap-2 tag-badge mb-3 md:mb-4 md:text-sm md:px-4 md:py-1.5 lg:px-5 lg:py-2 lg:text-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
               FREE TOOL
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold text-white tracking-tight"
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight"
                 style={{ textShadow: '0 0 40px rgba(96,165,250,0.4)' }}>
               QR Generator
             </h1>
-            <p className="text-white/50 mt-2 md:mt-3 text-sm md:text-base">
+            <p className="text-white/50 mt-2 md:mt-3 lg:mt-4 text-sm md:text-base lg:text-lg">
               Paste a link. Get a QR code. Done.
             </p>
           </div>
 
           {/* Card */}
-          <div className="glass glass-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-9 lg:p-10 flex flex-col gap-4 sm:gap-5 md:gap-6">
+          <div className="glass glass-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-9 lg:p-12 flex flex-col gap-4 sm:gap-5 md:gap-6 lg:gap-7">
 
             {/* URL Input */}
             <div className="flex flex-col gap-2 md:gap-3">
-              <label className="text-xs md:text-sm font-semibold uppercase tracking-widest text-white/60">Your URL</label>
-              <div className="input-glass rounded-xl sm:rounded-2xl flex items-center px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5 gap-3">
-                <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <label className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-widest text-white/60">Your URL</label>
+              <div className="input-glass rounded-xl sm:rounded-2xl flex items-center px-4 sm:px-5 md:px-6 lg:px-7 py-3 sm:py-4 md:py-5 lg:py-5 gap-3">
+                <svg className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 015.656 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10.172 13.828a4 4 0 01-5.656-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5" />
                 </svg>
@@ -146,7 +146,7 @@ export default function App() {
                   onChange={e => { setUrl(e.target.value); setGenerated(false) }}
                   onKeyDown={e => e.key === 'Enter' && handleGenerate()}
                   placeholder="https://example.com"
-                  className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/30 text-sm md:text-base min-w-0"
+                  className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/30 text-sm md:text-base lg:text-lg min-w-0"
                 />
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function App() {
 
             {/* Generate */}
             <button onClick={handleGenerate} disabled={loading}
-              className="btn-shimmer w-full py-3.5 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl text-white font-semibold text-xs sm:text-sm md:text-base uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="btn-shimmer w-full py-3.5 sm:py-4 md:py-5 lg:py-6 rounded-xl sm:rounded-2xl text-white font-semibold text-xs sm:text-sm md:text-base lg:text-lg uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.25),rgba(167,139,250,0.25))', border: '1px solid rgba(96,165,250,0.4)', boxShadow: '0 4px 24px rgba(96,165,250,0.2)' }}>
               {loading
                 ? <span className="flex items-center justify-center gap-2">
